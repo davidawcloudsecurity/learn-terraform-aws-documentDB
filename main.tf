@@ -220,7 +220,7 @@ EOF
   tags = {
     Name = "${var.docdb_name}-private-ec2-instance"
   }
-  depends_on = [resource.aws_docdb_cluster.docdb_cluster.port]
+  depends_on = [resource.aws_docdb_cluster.docdb_cluster]
 }
 
 # DocumentDB Cluster
