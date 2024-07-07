@@ -181,10 +181,10 @@ chmod +x /usr/local/bin/docker-compose
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 cd elixir-ambience
 
-# sed -i 's/"//g' ".env"
-# sed -i 's/mongourl=mongodb:\/\/mongo:27017/mongourl=mongodb:\/\/10.2.4.199:27017/g' ".env"
+sed -i 's/"//g' ".env"
+sed -i "s|mongourl=mongodb://mongo:27017|mongourl=mongodb://${docdb_cluster_endpoint}:${docdb_cluster_port}|g" ".env"
 # sed -i 's/externalhost=localhost/externalhost=testssl123.click/g' ".env"
-# sed -i 's/externalport=1740/externalport=443/g' ".env"
+sed -i 's/externalport=1740/externalport=${docdb_cluster_port}/g' ".env"
 # sed -i 's/externalprotocol=http/externalprotocol=https/g' ".env"
 cat << EOF3 > ./docker-compose.yaml
 version: "3"
