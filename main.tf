@@ -174,9 +174,7 @@ while ! ping -c 1 8.8.8.8 &> /dev/null; do
 done
 
 # Install Docker
-yum update -y
-yum install docker -y
-systemctl start docker
+yum update -y; yum install docker -y; sleep 5; systemctl start docker
 
 # Pull and run Ambience from Docker
 yum install git -y
