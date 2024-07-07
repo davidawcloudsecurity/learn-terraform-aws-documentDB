@@ -2,11 +2,6 @@ provider "aws" {
   region = "us-east-1"  # Change to your desired region
 }
 
-# Existing VPC and Subnets
-data "aws_subnet_ids" "main" {
-  vpc_id = aws_vpc.main.id
-}
-
 # VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
@@ -298,7 +293,7 @@ variable "cluster_parameters" {
 resource "aws_security_group" "alb_sg" {
   name        = "alb_security_group"
   description = "Allow HTTP and HTTPS traffic"
-  vpc_id      = data.aws_vpc.main.id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = 80
