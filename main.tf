@@ -246,3 +246,29 @@ resource "aws_docdb_subnet_group" "default" {
     Name = "docdb-subnet-group"
   }
 }
+
+# Output variables for EC2 Instance
+output "ec2_instance_id" {
+  value = aws_instance.app_server.id
+}
+
+output "ec2_instance_public_ip" {
+  value = aws_instance.app_server.public_ip
+}
+
+output "ec2_instance_private_ip" {
+  value = aws_instance.app_server.private_ip
+}
+
+# Output variables for DocumentDB Cluster
+output "docdb_cluster_id" {
+  value = aws_docdb_cluster.docdb_cluster.id
+}
+
+output "docdb_cluster_endpoint" {
+  value = aws_docdb_cluster.docdb_cluster.endpoint
+}
+
+output "docdb_cluster_port" {
+  value = aws_docdb_cluster.docdb_cluster.port
+}
