@@ -238,7 +238,7 @@ resource "aws_docdb_cluster_instance" "docdb_instance" {
 resource "aws_docdb_cluster_parameter_group" "default" {
   name        = "docdb-cluster-parameter-group"  # Replace with your desired name
   description = "DB cluster parameter group"
-  family      = "docdb4.0"  # Replace with your desired family version
+  family      = "docdb5.0"  # Replace with your desired family version
 
   dynamic "parameter" {
     for_each = var.cluster_parameters
