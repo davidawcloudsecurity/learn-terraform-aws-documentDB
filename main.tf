@@ -209,7 +209,7 @@ services:
 #  elixirmongodbdata:
 EOF3
 sed -i 's/\\//g' "./docker-compose.yaml"
-# docker-compose up
+docker-compose up
 EOF
   tags = {
     Name = "private-ec2-instance"
