@@ -4,7 +4,7 @@ provider "aws" {
 
 variable "docDB_name" {
   type = string
-  default = docdb_01_
+  default = "docdb_01_"
 }
 
 # VPC
