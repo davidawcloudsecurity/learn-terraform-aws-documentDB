@@ -215,8 +215,8 @@ EOF
 # DocumentDB Cluster
 resource "aws_docdb_cluster" "docdb_cluster" {
   cluster_identifier      = "docdb-cluster"
-  master_username         = ""
-  master_password         = ""  # Change to a secure password
+  master_username         = "admin2"
+  master_password         = "123"  # Change to a secure password
   backup_retention_period = 5
   preferred_backup_window = "07:00-09:00"
   vpc_security_group_ids  = [aws_security_group.allow_all.id]
