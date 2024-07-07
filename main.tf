@@ -2,7 +2,7 @@ provider "aws" {
   region = "us-east-1"  # Change to your desired region
 }
 
-variable "docDB_name" {
+variable "docdb_name" {
   type = string
   default = "docdb_01_"
 }
@@ -217,13 +217,14 @@ sed -i 's/\\//g' "./docker-compose.yaml"
 systemctl start docker; docker-compose up
 EOF
   tags = {
-    Name = "${var.docDB_name}private-ec2-instance"
+    Name = "${var.docdb_name}private-ec2-instance"
   }
 }
 
 # DocumentDB Cluster
 resource "aws_docdb_cluster" "docdb_cluster" {
-  cluster_identifier      = "${var.docDB_name}-cluster"
+  cluster_identifier      = "${var.docdb_name}-cluster"
+  cluster_identifier      = "${var.docdb_name}-cluster"
   master_username         = "docdbadmin"
   master_password         = "SecurePass123!"  # Change to a secure password
   backup_retention_period = 5
@@ -240,7 +241,7 @@ resource "aws_docdb_cluster_instance" "docdb_instance" {
   cluster_identifier = aws_docdb_cluster.docdb_cluster.id
   instance_class     = "db.r5.large"
   tags = {
-    Name = "${var.docDB_name}instance-${count.index}"
+    Name = "${var.docdb_name}instance-${count.index}"
   }
 }
 
@@ -259,7 +260,7 @@ resource "aws_docdb_cluster_parameter_group" "default" {
   }
 
   tags = {
-    Name = "${var.docDB_name}-cluster-parameter-group"  # Adjust as per your naming convention
+    Name = "${var.docdb_name}-cluster-parameter-group"  # Adjust as per your naming convention
     # Add any other tags if needed
   }
 }
@@ -273,7 +274,7 @@ resource "aws_docdb_subnet_group" "default" {
   ]
 
   tags = {
-    Name = "${var.docDB_name}subnet-group"
+    Name = "${var.docdb_name}subnet-group"
   }
 }
 
@@ -320,7 +321,7 @@ resource "aws_security_group" "alb_sg" {
   }
 
   tags = {
-    Name = "${var.docDB_name}alb_security_group"
+    Name = "${var.docdb_name}alb_security_group"
   }
 }
 
@@ -335,7 +336,7 @@ resource "aws_lb" "app_lb" {
   enable_deletion_protection = false
 
   tags = {
-    Name = "${var.docDB_name}app-load-balancer"
+    Name = "${var.docdb_name}app-load-balancer"
   }
 }
 
@@ -356,7 +357,7 @@ resource "aws_lb_target_group" "app_tg" {
   }
 
   tags = {
-    Name = "${var.docDB_name}app-target-group"
+    Name = "${var.docdb_name}app-target-group"
   }
 }
 
