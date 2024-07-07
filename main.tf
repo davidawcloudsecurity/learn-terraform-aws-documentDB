@@ -133,7 +133,7 @@ resource "aws_security_group" "allow_all" {
 }
 
 # EC2 Instance
-resource "aws_instance" "ec2" {
+resource "aws_instance" "app_server" {
   ami             = "ami-018ba43095ff50d08"  # Change to your desired AMI
   instance_type   = "t2.micro"
   subnet_id       = aws_subnet.private_a.id
