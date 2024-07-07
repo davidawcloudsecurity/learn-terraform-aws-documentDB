@@ -134,11 +134,79 @@ resource "aws_security_group" "allow_all" {
 
 # EC2 Instance
 resource "aws_instance" "ec2" {
-  ami             = "ami-0c55b159cbfafe1f0"  # Change to your desired AMI
+  ami             = "ami-018ba43095ff50d08"  # Change to your desired AMI
   instance_type   = "t2.micro"
   subnet_id       = aws_subnet.private_a.id
   security_groups = [aws_security_group.allow_all.name]
+  user_data = <<EOF
+#!/bin/bash
+# Define the path to the sshd_config file
+sshd_config="/etc/ssh/sshd_config"
 
+# Define the string to be replaced
+old_string="PasswordAuthentication no"
+new_string="PasswordAuthentication yes"
+
+# Check if the file exists
+if [ -e "$sshd_config" ]; then
+    # Use sed to replace the old string with the new string
+    sudo sed -i "s/$old_string/$new_string/" "$sshd_config"
+
+    # Check if the sed command was successful
+    if [ $? -eq 0 ]; then
+        echo "String replaced successfully."
+        # Restart the SSH service to apply the changes
+        sudo service ssh restart
+    else
+        echo "Error replacing string in $sshd_config."
+    fi
+else
+    echo "File $sshd_config not found."
+fi
+
+echo "123" | passwd --stdin ec2-user
+systemctl restart sshd
+
+# Install Docker
+yum update -y
+yum install docker -y
+systemctl start docker
+
+# Pull and run Ambience from Docker
+yum install git -y
+cd /home/ec2-user
+git clone https://github.com/ambience-cloud/elixir-ambience.git
+curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+cd elixir-ambience
+
+# sed -i 's/"//g' ".env"
+# sed -i 's/mongourl=mongodb:\/\/mongo:27017/mongourl=mongodb:\/\/10.2.4.199:27017/g' ".env"
+# sed -i 's/externalhost=localhost/externalhost=testssl123.click/g' ".env"
+# sed -i 's/externalport=1740/externalport=443/g' ".env"
+# sed -i 's/externalprotocol=http/externalprotocol=https/g' ".env"
+cat << EOF3 > ./docker-compose.yaml
+version: "3"
+services:
+  elixir-ambience:
+    container_name: elixir-ambience
+    image: elixirtech/elixir-ambience
+    environment:
+       #mongodb running in host for Windows and OSx
+       #mongodb part of docker compose
+       - mongourl=$\{mongourl\}
+       - externalhost=$\{externalhost\}
+       - externalport=$\{externalport\}
+       - externalprotocol=$\{externalprotocol\}
+    ports:
+       - 1740:1740
+#volumes:
+#  elixirmongodbdata:
+EOF3
+sed -i 's/\\//g' "./docker-compose.yaml"
+# docker-compose up
+EOF
   tags = {
     Name = "private-ec2-instance"
   }
