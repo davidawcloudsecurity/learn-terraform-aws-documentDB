@@ -301,7 +301,7 @@ resource "aws_lb" "app_lb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = data.aws_subnet_ids.main.ids
+  subnets            = aws_subnet_ids.main.ids
 
   enable_deletion_protection = false
 
