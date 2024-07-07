@@ -137,7 +137,7 @@ resource "aws_instance" "app_server" {
   count = 2 # Number of instances
   ami             = "ami-018ba43095ff50d08"  # Change to your desired AMI
   instance_type   = "t2.micro"
-  subnet_id     = element(data.aws_subnet_ids.main.ids, count.index)
+  subnet_id     = element(aws_subnet_ids.main.ids, count.index)
 #  subnet_id       = aws_subnet.private_a.id
   vpc_security_group_ids = [aws_security_group.allow_all.id]
   user_data = <<EOF
