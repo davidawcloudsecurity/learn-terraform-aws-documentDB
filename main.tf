@@ -182,9 +182,9 @@ ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 cd elixir-ambience
 
 sed -i 's/"//g' ".env"
-sed -i "s|mongourl=mongodb://mongo:27017|mongourl=mongodb://${docdb_cluster_endpoint}:${docdb_cluster_port}|g" ".env"
+sed -i "s|mongourl=mongodb://mongo:27017|mongourl=mongodb://$(aws_docdb_cluster.docdb_cluster.endpoint):$(aws_docdb_cluster.docdb_cluster.port)|g" ".env"
 # sed -i 's/externalhost=localhost/externalhost=testssl123.click/g' ".env"
-sed -i 's/externalport=1740/externalport=${docdb_cluster_port}/g' ".env"
+sed -i 's/externalport=1740/externalport=$(aws_docdb_cluster.docdb_cluster.port)/g' ".env"
 # sed -i 's/externalprotocol=http/externalprotocol=https/g' ".env"
 cat << EOF3 > ./docker-compose.yaml
 version: "3"
