@@ -220,7 +220,7 @@ resource "aws_docdb_cluster" "docdb_cluster" {
   backup_retention_period = 5
   preferred_backup_window = "07:00-09:00"
   vpc_security_group_ids  = [aws_security_group.allow_all.id]
-  db_subnet_group_name    = aws_docdb_subnet_group.docdb_subnet_group.id  # Use subnet group ID
+  db_subnet_group_name    = join("", aws_docdb_subnet_group.default[*].name)
 }
 
 # DocumentDB Instances
@@ -229,14 +229,13 @@ resource "aws_docdb_cluster_instance" "docdb_instance" {
   identifier         = "docdb-instance-${count.index}"
   cluster_identifier = aws_docdb_cluster.docdb_cluster.id
   instance_class     = "db.r5.large"
-  db_subnet_group_name = aws_docdb_subnet_group.docdb_subnet_group.name  # Use subnet group ID
   tags = {
     Name = "docdb-instance-${count.index}"
   }
 }
 
 # Subnet Group for DocumentDB
-resource "aws_docdb_subnet_group" "docdb_subnet_group" {
+resource "aws_docdb_subnet_group" "default" {
   name       = "docdb-subnet-group"
   subnet_ids = [
     aws_subnet.private_a.id,
