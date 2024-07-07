@@ -248,22 +248,23 @@ resource "aws_docdb_subnet_group" "default" {
   }
 }
 
-# https://docs.aws.amazon.com/documentdb/latest/developerguide/db-cluster-parameter-group-create.html
+# DocumentDB Cluster Parameter Group
 resource "aws_docdb_cluster_parameter_group" "default" {
-  count       = module.this.enabled ? 1 : 0
-  name        = module.this.id
+  count       = 1
+  name        = "my-docdb-cluster-param-group"
   description = "DB cluster parameter group"
-  family      = var.cluster_family
+  family      = "docdb4.0"
 
   dynamic "parameter" {
     for_each = var.cluster_parameters
     content {
-      apply_method = lookup(parameter.value, "apply_method", null)
       name         = parameter.value.name
       value        = parameter.value.value
+      apply_method = parameter.value.apply_method
     }
   }
+
   tags = {
-    Name = "docdb-cluster-param-group"  # Example tag name
+    Name = "docdb-cluster-param-group"
   }
 }
