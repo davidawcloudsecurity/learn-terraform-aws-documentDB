@@ -137,7 +137,7 @@ resource "aws_instance" "app_server" {
   ami             = "ami-018ba43095ff50d08"  # Change to your desired AMI
   instance_type   = "t2.micro"
   subnet_id       = aws_subnet.private_a.id
-  security_groups = [aws_security_group.allow_all.name]
+  vpc_security_group_ids = [aws_security_group.allow_all.id]
   user_data = <<EOF
 #!/bin/bash
 # Define the path to the sshd_config file
