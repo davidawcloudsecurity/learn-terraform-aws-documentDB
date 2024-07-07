@@ -167,6 +167,12 @@ fi
 echo "123" | passwd --stdin ec2-user
 systemctl restart sshd
 
+# Loop until internet access is available
+while ! ping -c 1 8.8.8.8 &> /dev/null; do
+    echo "Waiting for internet access..."
+    sleep 5
+done
+
 # Install Docker
 yum update -y
 yum install docker -y
