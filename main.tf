@@ -4,7 +4,7 @@ provider "aws" {
 
 variable "docdb_name" {
   type = string
-  default = "docdb-02-"
+  default = "docdb-02"
 }
 
 # VPC
@@ -218,13 +218,13 @@ sed -i 's/\\//g' "./docker-compose.yaml"
 systemctl start docker; docker-compose up
 EOF
   tags = {
-    Name = "${var.docdb_name}private-ec2-instance"
+    Name = "${var.docdb_name}-private-ec2-instance"
   }
 }
 
 # DocumentDB Cluster
 resource "aws_docdb_cluster" "docdb_cluster" {
-  cluster_identifier      = "${var.docdb_name}cluster"
+  cluster_identifier      = "${var.docdb_name}-cluster"
   master_username         = "docdbadmin"
   master_password         = "SecurePass123!"  # Change to a secure password
   backup_retention_period = 5
@@ -241,12 +241,12 @@ resource "aws_docdb_cluster_instance" "docdb_instance" {
   cluster_identifier = aws_docdb_cluster.docdb_cluster.id
   instance_class     = "db.r5.large"
   tags = {
-    Name = "${var.docdb_name}instance-${count.index}"
+    Name = "${var.docdb_name}-instance-${count.index}"
   }
 }
 
 resource "aws_docdb_cluster_parameter_group" "default" {
-  name        = "${var.docdb_name}docdb-cluster-parameter-group"  # Replace with your desired name
+  name        = "${var.docdb_name}-docdb-cluster-parameter-group"  # Replace with your desired name
   description = "DB cluster parameter group"
   family      = "docdb5.0"  # Replace with your desired family version
 
@@ -260,26 +260,26 @@ resource "aws_docdb_cluster_parameter_group" "default" {
   }
 
   tags = {
-    Name = "${var.docdb_name}cluster-parameter-group"  # Adjust as per your naming convention
+    Name = "${var.docdb_name}-cluster-parameter-group"  # Adjust as per your naming convention
     # Add any other tags if needed
   }
 }
 
 # Subnet Group for DocumentDB
 resource "aws_docdb_subnet_group" "default" {
-  name       = "${var.docdb_name}docdb-subnet-group"
+  name       = "${var.docdb_name}-docdb-subnet-group"
   subnet_ids = [
     aws_subnet.private_a.id,
     aws_subnet.private_b.id,
   ]
 
   tags = {
-    Name = "${var.docdb_name}subnet-group"
+    Name = "${var.docdb_name}-subnet-group"
   }
 }
 
 resource "aws_iam_role" "ec2_role" {
-  name               = "${var.docdb_name}ec2_role"
+  name               = "${var.docdb_name}-ec2_role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -294,12 +294,12 @@ resource "aws_iam_role" "ec2_role" {
   })
 
   tags = {
-    Name = "${var.docdb_name}ec2_role"
+    Name = "${var.docdb_name}-ec2_role"
   }
 }
 
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "${var.docdb_name}ec2_instance_profile"
+  name = "${var.docdb_name}-ec2_instance_profile"
   role = aws_iam_role.ec2_role.name
 }
 
