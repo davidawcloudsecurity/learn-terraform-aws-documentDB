@@ -142,6 +142,7 @@ resource "aws_instance" "app_server" {
   ami             = "ami-018ba43095ff50d08"  # Change to your desired AMI
   instance_type   = "t2.micro"
   subnet_id       = aws_subnet.private_a.id
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
   vpc_security_group_ids = [aws_security_group.allow_all.id]
   user_data = <<EOF
 #!/bin/bash
@@ -276,6 +277,38 @@ resource "aws_docdb_subnet_group" "default" {
     Name = "${var.docdb_name}subnet-group"
   }
 }
+
+resource "aws_iam_role" "ec2_role" {
+  name               = "${var.docdb_name}ec2_role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect    = "Allow",
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        },
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = {
+    Name = "${var.docdb_name}ec2_role"
+  }
+}
+
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = "${var.docdb_name}ec2_instance_profile"
+
+  roles = [aws_iam_role.ec2_role.name]
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 
 variable "cluster_parameters" {
   type = list(object({
