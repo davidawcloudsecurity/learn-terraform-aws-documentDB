@@ -184,9 +184,9 @@ curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compo
 chmod +x /usr/local/bin/docker-compose
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 cd elixir-ambience
-
+wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 sed -i 's/"//g' ".env"
-sed -i "s|mongourl=mongodb://mongo:27017|mongourl=mongodb://$(aws_docdb_cluster.docdb_cluster.endpoint):$(aws_docdb_cluster.docdb_cluster.port)|g" ".env"
+sed -i "s|mongourl=mongodb://mongo:27017|mongourl=mongodb://$(aws_docdb_cluster.docdb_cluster.endpoint):$(aws_docdb_cluster.docdb_cluster.port)/?tls=true&tlsCAFile=global0bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false|g" ".env"
 # sed -i 's/externalhost=localhost/externalhost=testssl123.click/g' ".env"
 sed -i 's/externalport=1740/externalport=$(aws_docdb_cluster.docdb_cluster.port)/g' ".env"
 # sed -i 's/externalprotocol=http/externalprotocol=https/g' ".env"
@@ -212,7 +212,7 @@ sed -i 's/\\//g' "./docker-compose.yaml"
 systemctl start docker; docker-compose up
 EOF
   tags = {
-    Name = "app-server"
+    Name = "private-ec2-instance"
   }
 }
 
@@ -244,6 +244,15 @@ resource "aws_docdb_cluster_parameter_group" "default" {
   description = "DB cluster parameter group"
   family      = "docdb5.0"  # Replace with your desired family version
 
+  dynamic "parameter" {
+    for_each = var.cluster_parameters
+    content {
+      apply_method = parameter.value.apply_method
+      name         = parameter.value.name
+      value        = parameter.value.value
+    }
+  }
+
   tags = {
     Name = "docdb-cluster-parameter-group"  # Adjust as per your naming convention
     # Add any other tags if needed
@@ -263,92 +272,19 @@ resource "aws_docdb_subnet_group" "default" {
   }
 }
 
-# Security Group for ALB
-resource "aws_security_group" "alb_sg" {
-  name        = "alb_security_group"
-  description = "Allow HTTP and HTTPS traffic"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "alb_security_group"
-  }
-}
-
-# Application Load Balancer
-resource "aws_lb" "app_lb" {
-  name               = "app-load-balancer"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = aws_subnet_ids.main.ids
-
-  enable_deletion_protection = false
-
-  tags = {
-    Name = "app-load-balancer"
-  }
-}
-
-# Target Group
-resource "aws_lb_target_group" "app_tg" {
-  name     = "app-target-group"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
-
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 5
-    interval            = 30
-    path                = "/"
-    matcher             = "200-299"
-  }
-
-  tags = {
-    Name = "app-target-group"
-  }
-}
-
-# Listener
-resource "aws_lb_listener" "app_listener" {
-  load_balancer_arn = aws_lb.app_lb.arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.app_tg.arn
-  }
-}
-
-# Attach Instances to Target Group
-resource "aws_lb_target_group_attachment" "app_tg_attachment" {
-  count            = length(aws_instance.app_server.*.id)
-  target_group_arn = aws_lb_target_group.app_tg.arn
-  target_id        = element(aws_instance.app_server.*.id, count.index)
-  port             = 80
+variable "cluster_parameters" {
+  type = list(object({
+    name         = string
+    value        = string
+    apply_method = string
+  }))
+  default = [
+    {
+      name         = "tls"
+      value        = "enabled"
+      apply_method = "pending-reboot"
+    }
+  ]
 }
 
 # Output variables for EC2 Instance
