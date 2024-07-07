@@ -11,3 +11,9 @@ sudo yum install -y yum-utils shadow-utils; sudo yum-config-manager --add-repo h
 ```bash
 https://github.com/cloudposse/terraform-aws-documentdb-cluster/tree/main
 ```
+## Redo
+ALB
+[] https://github.com/terraform-aws-modules/terraform-aws-alb/tree/master/modules
+VPC
+[] https://github.com/terraform-aws-modules/terraform-aws-vpc
+
