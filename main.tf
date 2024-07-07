@@ -2,9 +2,14 @@ provider "aws" {
   region = "us-east-1"  # Change to your desired region
 }
 
+# Generate a random alphanumeric string
+resource "random_id" "random_string" {
+  byte_length = 8 # Adjust the length as needed
+}
+
 variable "docdb_name" {
   type = string
-  default = "docdb-01-"
+  default = "docdb-${random_id.random_string.hex}-"
 }
 
 # VPC
@@ -223,7 +228,7 @@ EOF
 
 # DocumentDB Cluster
 resource "aws_docdb_cluster" "docdb_cluster" {
-  cluster_identifier      = "${var.docdb_name}-cluster"
+  cluster_identifier      = "${var.docdb_name}cluster"
   master_username         = "docdbadmin"
   master_password         = "SecurePass123!"  # Change to a secure password
   backup_retention_period = 5
