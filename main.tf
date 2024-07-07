@@ -192,7 +192,7 @@ ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 cd elixir-ambience
 wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 sed -i 's/"//g' ".env"
-sed -i "s|mongourl=mongodb://mongo:27017|mongourl=mongodb://$(docdb_cluster_endpoint):$(docdb_cluster_port)|g" ".env"
+sed -i "s|mongourl=mongodb://mongo:27017|mongourl=mongodb://$(docdb_cluster_endpoint):$(aws_docdb_cluster.docdb_cluster.port)|g" ".env"
 # sed -i 's/externalhost=localhost/externalhost=testssl123.click/g' ".env"
 sed -i 's/externalport=1740/externalport=$(aws_docdb_cluster.docdb_cluster.port)/g' ".env"
 # sed -i 's/externalprotocol=http/externalprotocol=https/g' ".env"
@@ -220,6 +220,7 @@ EOF
   tags = {
     Name = "${var.docdb_name}-private-ec2-instance"
   }
+  depends_on = [resource.aws_docdb_cluster.docdb_cluster.port]
 }
 
 # DocumentDB Cluster
