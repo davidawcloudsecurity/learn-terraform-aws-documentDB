@@ -224,7 +224,6 @@ EOF
 # DocumentDB Cluster
 resource "aws_docdb_cluster" "docdb_cluster" {
   cluster_identifier      = "${var.docdb_name}-cluster"
-  cluster_identifier      = "${var.docdb_name}-cluster"
   master_username         = "docdbadmin"
   master_password         = "SecurePass123!"  # Change to a secure password
   backup_retention_period = 5
