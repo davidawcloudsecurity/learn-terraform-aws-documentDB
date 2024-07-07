@@ -212,7 +212,7 @@ sed -i 's/\\//g' "./docker-compose.yaml"
 systemctl start docker; docker-compose up
 EOF
   tags = {
-    Name = "app-server-${count.index + 1}"
+    Name = "app-server"
   }
 }
 
