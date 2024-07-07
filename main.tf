@@ -2,6 +2,15 @@ provider "aws" {
   region = "us-east-1"  # Change to your desired region
 }
 
+# Existing VPC and Subnets
+data "aws_vpc" "main" {
+  id = aws_vpc.main.id # Replace with your VPC ID
+}
+
+data "aws_subnet_ids" "main" {
+  vpc_id = data.aws_vpc.main.id
+}
+
 # VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
@@ -134,9 +143,11 @@ resource "aws_security_group" "allow_all" {
 
 # EC2 Instance
 resource "aws_instance" "app_server" {
+  count = 2 # Number of instances
   ami             = "ami-018ba43095ff50d08"  # Change to your desired AMI
   instance_type   = "t2.micro"
-  subnet_id       = aws_subnet.private_a.id
+  subnet_id     = element(data.aws_subnet_ids.main.ids, count.index)
+#  subnet_id       = aws_subnet.private_a.id
   vpc_security_group_ids = [aws_security_group.allow_all.id]
   user_data = <<EOF
 #!/bin/bash
@@ -212,7 +223,7 @@ sed -i 's/\\//g' "./docker-compose.yaml"
 systemctl start docker; docker-compose up
 EOF
   tags = {
-    Name = "private-ec2-instance"
+    Name = "app-server-${count.index + 1}"
   }
 }
 
@@ -285,6 +296,94 @@ variable "cluster_parameters" {
       apply_method = "pending-reboot"
     }
   ]
+}
+
+# Security Group for ALB
+resource "aws_security_group" "alb_sg" {
+  name        = "alb_security_group"
+  description = "Allow HTTP and HTTPS traffic"
+  vpc_id      = data.aws_vpc.main.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "alb_security_group"
+  }
+}
+
+# Application Load Balancer
+resource "aws_lb" "app_lb" {
+  name               = "app-load-balancer"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = data.aws_subnet_ids.main.ids
+
+  enable_deletion_protection = false
+
+  tags = {
+    Name = "app-load-balancer"
+  }
+}
+
+# Target Group
+resource "aws_lb_target_group" "app_tg" {
+  name     = "app-target-group"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = data.aws_vpc.main.id
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 5
+    interval            = 30
+    path                = "/"
+    matcher             = "200-299"
+  }
+
+  tags = {
+    Name = "app-target-group"
+  }
+}
+
+# Listener
+resource "aws_lb_listener" "app_listener" {
+  load_balancer_arn = aws_lb.app_lb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app_tg.arn
+  }
+}
+
+# Attach Instances to Target Group
+resource "aws_lb_target_group_attachment" "app_tg_attachment" {
+  count            = length(aws_instance.app_server.*.id)
+  target_group_arn = aws_lb_target_group.app_tg.arn
+  target_id        = element(aws_instance.app_server.*.id, count.index)
+  port             = 80
 }
 
 # Output variables for EC2 Instance
