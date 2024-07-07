@@ -221,6 +221,7 @@ resource "aws_docdb_cluster" "docdb_cluster" {
   preferred_backup_window = "07:00-09:00"
   vpc_security_group_ids  = [aws_security_group.allow_all.id]
   db_subnet_group_name    = join("", aws_docdb_subnet_group.default[*].name)
+  db_cluster_parameter_group_name = join("", aws_docdb_cluster_parameter_group.default[*].name)
 }
 
 # DocumentDB Instances
@@ -245,4 +246,23 @@ resource "aws_docdb_subnet_group" "default" {
   tags = {
     Name = "docdb-subnet-group"
   }
+}
+
+# https://docs.aws.amazon.com/documentdb/latest/developerguide/db-cluster-parameter-group-create.html
+resource "aws_docdb_cluster_parameter_group" "default" {
+  count       = module.this.enabled ? 1 : 0
+  name        = module.this.id
+  description = "DB cluster parameter group"
+  family      = var.cluster_family
+
+  dynamic "parameter" {
+    for_each = var.cluster_parameters
+    content {
+      apply_method = lookup(parameter.value, "apply_method", null)
+      name         = parameter.value.name
+      value        = parameter.value.value
+    }
+  }
+
+  tags = module.this.tags
 }
