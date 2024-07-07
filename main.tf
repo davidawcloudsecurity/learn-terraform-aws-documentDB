@@ -246,7 +246,7 @@ resource "aws_docdb_cluster_instance" "docdb_instance" {
 }
 
 resource "aws_docdb_cluster_parameter_group" "default" {
-  name        = "docdb-cluster-parameter-group"  # Replace with your desired name
+  name        = "${var.docdb_name}docdb-cluster-parameter-group"  # Replace with your desired name
   description = "DB cluster parameter group"
   family      = "docdb5.0"  # Replace with your desired family version
 
@@ -267,7 +267,7 @@ resource "aws_docdb_cluster_parameter_group" "default" {
 
 # Subnet Group for DocumentDB
 resource "aws_docdb_subnet_group" "default" {
-  name       = "docdb-subnet-group"
+  name       = "${var.docdb_name}docdb-subnet-group"
   subnet_ids = [
     aws_subnet.private_a.id,
     aws_subnet.private_b.id,
