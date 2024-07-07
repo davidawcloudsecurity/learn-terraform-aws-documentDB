@@ -3,12 +3,8 @@ provider "aws" {
 }
 
 # Existing VPC and Subnets
-data "aws_vpc" "main" {
-  id = aws_vpc.main.id # Replace with your VPC ID
-}
-
 data "aws_subnet_ids" "main" {
-  vpc_id = data.aws_vpc.main.id
+  vpc_id = aws_vpc.main.id
 }
 
 # VPC
