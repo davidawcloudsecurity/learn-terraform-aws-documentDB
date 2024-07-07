@@ -212,6 +212,7 @@ EOF
   }
 }
 
+# DocumentDB Cluster
 resource "aws_docdb_cluster" "docdb_cluster" {
   cluster_identifier      = "docdb-cluster"
   master_username         = "docdbadmin"
@@ -219,6 +220,7 @@ resource "aws_docdb_cluster" "docdb_cluster" {
   backup_retention_period = 5
   preferred_backup_window = "07:00-09:00"
   vpc_security_group_ids  = [aws_security_group.allow_all.id]
+  db_subnet_group_name    = aws_docdb_subnet_group.docdb_subnet_group.id  # Use subnet group ID
 }
 
 # DocumentDB Instances
@@ -227,29 +229,19 @@ resource "aws_docdb_cluster_instance" "docdb_instance" {
   identifier         = "docdb-instance-${count.index}"
   cluster_identifier = aws_docdb_cluster.docdb_cluster.id
   instance_class     = "db.r5.large"
-  # Other instance configuration parameters as needed
+  subnet_group_name  = aws_docdb_subnet_group.docdb_subnet_group.id  # Use subnet group ID
   tags = {
     Name = "docdb-instance-${count.index}"
   }
 }
 
-/*
-resource "aws_docdb_cluster_instance" "docdb_instance" {
-  count           = 2
-  identifier      = "docdb-instance-${count.index}"
-  cluster_identifier = aws_docdb_cluster.docdb_cluster.id
-  instance_class  = "db.r5.large"
-  subnet_id       = element([aws_subnet.private_a.id, aws_subnet.private_b.id], count.index)
-
-  tags = {
-    Name = "docdb-instance-${count.index}"
-  }
-}
-*/
 # Subnet Group for DocumentDB
 resource "aws_docdb_subnet_group" "docdb_subnet_group" {
   name       = "docdb-subnet-group"
-  subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+  subnet_ids = [
+    aws_subnet.private_a.id,
+    aws_subnet.private_b.id,
+  ]
 
   tags = {
     Name = "docdb-subnet-group"
