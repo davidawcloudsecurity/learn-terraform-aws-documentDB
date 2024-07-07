@@ -263,6 +263,7 @@ resource "aws_docdb_cluster_parameter_group" "default" {
       value        = parameter.value.value
     }
   }
-
-  tags = module.this.tags
+  tags = {
+    Name = "docdb-cluster-param-group"  # Example tag name
+  }
 }
