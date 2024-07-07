@@ -215,12 +215,13 @@ EOF
 # DocumentDB Cluster
 resource "aws_docdb_cluster" "docdb_cluster" {
   cluster_identifier      = "docdb-cluster"
-  master_username         = "docdbadmin"
-  master_password         = "SecurePass123!"  # Change to a secure password
+  master_username         = ""
+  master_password         = ""  # Change to a secure password
   backup_retention_period = 5
   preferred_backup_window = "07:00-09:00"
   vpc_security_group_ids  = [aws_security_group.allow_all.id]
   db_subnet_group_name    = join("", aws_docdb_subnet_group.default[*].name)
+  db_cluster_parameter_group_name = aws_docdb_cluster_parameter_group.default.name
 }
 
 # DocumentDB Instances
@@ -231,6 +232,26 @@ resource "aws_docdb_cluster_instance" "docdb_instance" {
   instance_class     = "db.r5.large"
   tags = {
     Name = "docdb-instance-${count.index}"
+  }
+}
+
+resource "aws_docdb_cluster_parameter_group" "default" {
+  name        = "docdb-cluster-parameter-group"  # Replace with your desired name
+  description = "DB cluster parameter group"
+  family      = "docdb4.0"  # Replace with your desired family version
+
+  dynamic "parameter" {
+    for_each = var.cluster_parameters
+    content {
+      apply_method = parameter.value.apply_method
+      name         = parameter.value.name
+      value        = parameter.value.value
+    }
+  }
+
+  tags = {
+    Name = "docdb-cluster-parameter-group"  # Adjust as per your naming convention
+    # Add any other tags if needed
   }
 }
 
@@ -245,6 +266,21 @@ resource "aws_docdb_subnet_group" "default" {
   tags = {
     Name = "docdb-subnet-group"
   }
+}
+
+variable "cluster_parameters" {
+  type = list(object({
+    name         = string
+    value        = string
+    apply_method = string
+  }))
+  default = [
+    {
+      name         = "tls"
+      value        = "disabled"
+      apply_method = "pending-reboot"
+    }
+  ]
 }
 
 # Output variables for EC2 Instance
