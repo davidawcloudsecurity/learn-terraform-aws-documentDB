@@ -260,7 +260,7 @@ resource "aws_docdb_cluster_parameter_group" "default" {
   }
 
   tags = {
-    Name = "${var.docdb_name}-cluster-parameter-group"  # Adjust as per your naming convention
+    Name = "${var.docdb_name}cluster-parameter-group"  # Adjust as per your naming convention
     # Add any other tags if needed
   }
 }
