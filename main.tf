@@ -212,7 +212,7 @@ EOF
   }
 }
 
-# DocumentDB Cluster
+/*
 resource "aws_docdb_cluster" "docdb_cluster" {
   cluster_identifier      = "docdb-cluster"
   master_username         = "docdbadmin"
@@ -221,8 +221,20 @@ resource "aws_docdb_cluster" "docdb_cluster" {
   preferred_backup_window = "07:00-09:00"
   vpc_security_group_ids  = [aws_security_group.allow_all.id]
 }
-
+*/
 # DocumentDB Instances
+resource "aws_docdb_cluster_instance" "docdb_instance" {
+  count              = 2
+  identifier         = "docdb-instance-${count.index}"
+  cluster_identifier = aws_docdb_cluster.docdb_cluster.id
+  instance_class     = "db.r5.large"
+  # Other instance configuration parameters as needed
+  tags = {
+    Name = "docdb-instance-${count.index}"
+  }
+}
+
+/*
 resource "aws_docdb_cluster_instance" "docdb_instance" {
   count           = 2
   identifier      = "docdb-instance-${count.index}"
@@ -234,7 +246,7 @@ resource "aws_docdb_cluster_instance" "docdb_instance" {
     Name = "docdb-instance-${count.index}"
   }
 }
-
+*/
 # Subnet Group for DocumentDB
 resource "aws_docdb_subnet_group" "docdb_subnet_group" {
   name       = "docdb-subnet-group"
