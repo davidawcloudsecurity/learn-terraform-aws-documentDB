@@ -244,15 +244,6 @@ resource "aws_docdb_cluster_parameter_group" "default" {
   description = "DB cluster parameter group"
   family      = "docdb5.0"  # Replace with your desired family version
 
-  dynamic "parameter" {
-    for_each = var.cluster_parameters
-    content {
-      apply_method = parameter.value.apply_method
-      name         = parameter.value.name
-      value        = parameter.value.value
-    }
-  }
-
   tags = {
     Name = "docdb-cluster-parameter-group"  # Adjust as per your naming convention
     # Add any other tags if needed
@@ -270,21 +261,6 @@ resource "aws_docdb_subnet_group" "default" {
   tags = {
     Name = "docdb-subnet-group"
   }
-}
-
-variable "cluster_parameters" {
-  type = list(object({
-    name         = string
-    value        = string
-    apply_method = string
-  }))
-  default = [
-    {
-      name         = "tls"
-      value        = "disabled"
-      apply_method = "pending-reboot"
-    }
-  ]
 }
 
 # Security Group for ALB
