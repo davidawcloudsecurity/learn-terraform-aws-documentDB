@@ -7,6 +7,17 @@ variable "docdb_name" {
   default = "docdb-02"
 }
 
+variable "docdb_username" {
+  type = string
+  default = "docdbadmin"
+}
+
+variable "docdb_password" {
+  type = string
+  default = "SecurePass123!"
+}
+
+
 # VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
@@ -192,7 +203,7 @@ ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 cd elixir-ambience
 wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 sed -i 's/"//g' ".env"
-sed -i "s|mongourl=mongodb://mongo:27017|mongourl=mongodb://${aws_docdb_cluster.docdb_cluster.endpoint}:${aws_docdb_cluster.docdb_cluster.port}|g" ".env"
+sed -i "s|mongourl=mongodb://mongo:27017|mongourl=mongodb://${var.docdb_username}:${var.docdb_password}@${aws_docdb_cluster.docdb_cluster.endpoint}:${aws_docdb_cluster.docdb_cluster.port}|g" ".env"
 # sed -i 's/externalhost=localhost/externalhost=testssl123.click/g' ".env"
 sed -i 's/externalport=1740/externalport=${aws_docdb_cluster.docdb_cluster.port}/g' ".env"
 # sed -i 's/externalprotocol=http/externalprotocol=https/g' ".env"
