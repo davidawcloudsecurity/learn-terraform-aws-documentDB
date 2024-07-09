@@ -27,7 +27,7 @@ variable "instance_class" {
 
 variable "cluster_size" {
   type        = number
-  default     = 2
+  default     = 1
   description = "Number of DB instances to create in the cluster"
 }
 
@@ -87,13 +87,26 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-resource "aws_subnet" "public" {
+# Create Public Subnets in two AZs
+resource "aws_subnet" "public_a" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
+  availability_zone       = "ap-southeast-1a"  # Specify AZ for the subnet
 
   tags = {
-    Name = "public-subnet"
+    Name = "${var.docdb_name}-public-subnet-a"
+  }
+}
+
+resource "aws_subnet" "public_b" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.4.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = "ap-southeast-1b"  # Specify different AZ for the subnet
+
+  tags = {
+    Name = "${var.docdb_name}-public-subnet-b"
   }
 }
 
@@ -128,21 +141,24 @@ resource "aws_nat_gateway" "nat" {
   }
 }
 
+# Create Private Subnets in two AZs
 resource "aws_subnet" "private_a" {
-  vpc_id    = aws_vpc.main.id
-  cidr_block = "10.0.2.0/24"
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "ap-southeast-1a"  # Specify AZ for the subnet
 
   tags = {
-    Name = "private-subnet-a"
+    Name = "${var.docdb_name}-private-subnet-a"
   }
 }
 
 resource "aws_subnet" "private_b" {
-  vpc_id    = aws_vpc.main.id
-  cidr_block = "10.0.3.0/24"
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.3.0/24"
+  availability_zone = "ap-southeast-1b"  # Specify different AZ for the subnet
 
   tags = {
-    Name = "private-subnet-b"
+    Name = "${var.docdb_name}-private-subnet-a"
   }
 }
 
