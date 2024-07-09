@@ -31,6 +31,12 @@ variable "cluster_size" {
   description = "Number of DB instances to create in the cluster"
 }
 
+variable "storage_type" {
+  type        = string
+  description = "The storage type to associate with the DB cluster. Valid values: standard, iopt1"
+  default     = "standard"
+}
+
 variable "snapshot_identifier" {
   type        = string
   default     = ""
