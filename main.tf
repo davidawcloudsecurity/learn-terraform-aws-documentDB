@@ -1,6 +1,6 @@
 # Define AWS provider and region
 provider "aws" {
-  region = "us-east-1"  # Replace with your desired region
+  region = "ap-southeast-1"  # Replace with your desired region
 }
 
 # Variables
