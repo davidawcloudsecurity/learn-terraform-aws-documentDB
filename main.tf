@@ -138,12 +138,21 @@ resource "aws_eip" "nat" {
   domain = "vpc"
 }
 
-resource "aws_nat_gateway" "nat" {
+resource "aws_nat_gateway" "nat_a" {
   allocation_id = aws_eip.nat.id
   subnet_id      = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 
   tags = {
     Name = "main-nat-gateway"
+  }
+}
+
+resource "aws_nat_gateway" "nat_b" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public_b.id  # Specify the second public subnet ID
+
+  tags = {
+    Name = "main-nat-gateway-b"
   }
 }
 
