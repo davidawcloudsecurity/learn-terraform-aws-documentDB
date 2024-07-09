@@ -31,6 +31,18 @@ variable "cluster_size" {
   description = "Number of DB instances to create in the cluster"
 }
 
+variable "snapshot_identifier" {
+  type        = string
+  default     = ""
+  description = "Specifies whether or not to create this cluster from a snapshot. You can use either the name or ARN when specifying a DB cluster snapshot, or the ARN when specifying a DB snapshot"
+}
+
+variable "db_port" {
+  type        = number
+  default     = 27017
+  description = "DocumentDB port"
+}
+
 variable "cluster_family" {
   type        = string
   default     = "docdb5.0"
@@ -197,6 +209,8 @@ resource "aws_docdb_cluster" "docdb_cluster" {
   master_password            = var.docdb_password
   backup_retention_period    = 5
   preferred_backup_window    = "07:00-09:00"
+  storage_type               = var.storage_type
+  port                       = var.db_port
   vpc_security_group_ids     = [aws_security_group.allow_all.id]
   db_subnet_group_name       = aws_docdb_subnet_group.default.name
   db_cluster_parameter_group_name = aws_docdb_cluster_parameter_group.default.name
