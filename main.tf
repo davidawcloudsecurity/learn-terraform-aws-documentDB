@@ -124,7 +124,7 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.public.id
+  subnet_id      = [aws_subnet.public_a.id, aws_subnet.public_b.id]
   route_table_id = aws_route_table.public.id
 }
 
@@ -134,7 +134,7 @@ resource "aws_eip" "nat" {
 
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public.id
+  subnet_id      = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 
   tags = {
     Name = "main-nat-gateway"
