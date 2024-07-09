@@ -19,7 +19,7 @@ variable "docdb_password" {
   default = "SecurePass123!"
 }
 
-variable   "instance_class" {
+variable "instance_class" {
   type =  = string
   default = "db.r5.large"
   description = "The instance class to use. For more details, see https://docs.aws.amazon.com/documentdb/latest/developerguide/db-instance-classes.html#db-instance-class-specs"
